@@ -5,8 +5,9 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { fetchDoctorsWithFilters } from '@/redux/doctors/doctorThunks';
-import { setSearch, setCity, setSpeciality } from '@/redux/filters/filterSlice';
+import { setSearch, setCities, setSpecialities } from '@/redux/filters/filterSlice';
 import { clearList } from '@/redux/doctors/doctorSlice';
+import { CITIES, SPECIALITIES } from '@/constants/theme';
 
 const PRIMARY = '#0a7ea4';
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/80?text=MD';
@@ -36,23 +37,29 @@ export default function DoctorListingScreen() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { list, listLoading, hasMore, page } = useSelector((state: any) => state.doctors);
-  const { search, city, speciality } = useSelector((state: any) => state.filters);
+  const { search, cities, specialities } = useSelector((state: any) => state.filters);
 
   const [searchInput, setSearchInput] = useState(search);
-  const [cityInput, setCityInput] = useState(city);
-  const [specialityInput, setSpecialityInput] = useState(speciality);
+  const [selectedCities, setSelectedCities] = useState<string[]>(cities ?? []);
+  const [selectedSpecialities, setSelectedSpecialities] = useState<string[]>(specialities ?? []);
+
+  useEffect(() => {
+    setSearchInput(search);
+    setSelectedCities(Array.isArray(cities) ? cities : []);
+    setSelectedSpecialities(Array.isArray(specialities) ? specialities : []);
+  }, [search, cities, specialities]);
 
   const load = useCallback((append: boolean) => {
     const nextPage = append ? page + 1 : 1;
     dispatch(fetchDoctorsWithFilters({
       search: searchInput.trim() || undefined,
-      city: cityInput || undefined,
-      speciality: specialityInput || undefined,
+      cities: selectedCities.length ? selectedCities : undefined,
+      specialities: selectedSpecialities.length ? selectedSpecialities : undefined,
       page: nextPage,
       limit: 10,
       append,
     }) as any);
-  }, [dispatch, searchInput, cityInput, specialityInput, page]);
+  }, [dispatch, searchInput, selectedCities, selectedSpecialities, page]);
 
   useEffect(() => {
     dispatch(clearList());
@@ -61,17 +68,28 @@ export default function DoctorListingScreen() {
 
   const applyFilters = () => {
     dispatch(setSearch(searchInput.trim()));
-    dispatch(setCity(cityInput));
-    dispatch(setSpeciality(specialityInput));
+    dispatch(setCities(selectedCities));
+    dispatch(setSpecialities(selectedSpecialities));
     dispatch(clearList());
     dispatch(fetchDoctorsWithFilters({
       search: searchInput.trim() || undefined,
-      city: cityInput || undefined,
-      speciality: specialityInput || undefined,
+      cities: selectedCities.length ? selectedCities : undefined,
+      specialities: selectedSpecialities.length ? selectedSpecialities : undefined,
       page: 1,
       limit: 10,
       append: false,
     }) as any);
+  };
+
+  const toggleCity = (city: string) => {
+    setSelectedCities((prev) =>
+      prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
+    );
+  };
+  const toggleSpeciality = (spec: string) => {
+    setSelectedSpecialities((prev) =>
+      prev.includes(spec) ? prev.filter((s) => s !== spec) : [...prev, spec]
+    );
   };
 
   const loadMore = () => {
@@ -89,27 +107,43 @@ export default function DoctorListingScreen() {
           value={searchInput}
           onChangeText={setSearchInput}
         />
-        <View style={styles.filterRow}>
-          <View style={styles.filterHalf}>
-            <ThemedText style={styles.label}>City</ThemedText>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Mumbai"
-              placeholderTextColor="#999"
-              value={cityInput}
-              onChangeText={setCityInput}
-            />
-          </View>
-          <View style={styles.filterHalf}>
-            <ThemedText style={styles.label}>Speciality</ThemedText>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Cardiologist"
-              placeholderTextColor="#999"
-              value={specialityInput}
-              onChangeText={setSpecialityInput}
-            />
-          </View>
+        <ThemedText style={styles.filterLabel}>Filter by City</ThemedText>
+        <View style={styles.filterWrap}>
+          {CITIES.map((c) => {
+            const isSelected = selectedCities.includes(c);
+            return (
+              <Pressable
+                key={c}
+                style={({ pressed }) => [
+                  styles.filterChip,
+                  isSelected && styles.filterChipSelected,
+                  pressed && styles.filterChipPressed,
+                ]}
+                onPress={() => toggleCity(c)}
+              >
+                <ThemedText style={[styles.filterChipText, isSelected && styles.filterChipTextSelected]}>{c}</ThemedText>
+              </Pressable>
+            );
+          })}
+        </View>
+        <ThemedText style={styles.filterLabel}>Filter by Speciality</ThemedText>
+        <View style={styles.filterWrap}>
+          {SPECIALITIES.map((s) => {
+            const isSelected = selectedSpecialities.includes(s);
+            return (
+              <Pressable
+                key={s}
+                style={({ pressed }) => [
+                  styles.filterChip,
+                  isSelected && styles.filterChipSelected,
+                  pressed && styles.filterChipPressed,
+                ]}
+                onPress={() => toggleSpeciality(s)}
+              >
+                <ThemedText style={[styles.filterChipText, isSelected && styles.filterChipTextSelected]}>{s}</ThemedText>
+              </Pressable>
+            );
+          })}
         </View>
         <Pressable style={({ pressed }) => [styles.applyBtn, pressed && styles.btnPressed]} onPress={applyFilters}>
           <ThemedText style={styles.applyBtnText}>Apply</ThemedText>
@@ -159,10 +193,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  filterRow: { flexDirection: 'row', gap: 12 },
-  filterHalf: { flex: 1 },
+  filterLabel: { fontSize: 13, fontWeight: '600', marginBottom: 8, opacity: 0.9 },
+  filterWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  filterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f4f8',
+    borderWidth: 1,
+    borderColor: '#e0e4e8',
+  },
+  filterChipSelected: { backgroundColor: PRIMARY, borderColor: PRIMARY },
+  filterChipPressed: { opacity: 0.9 },
+  filterChipText: { fontSize: 13 },
+  filterChipTextSelected: { color: '#fff', fontWeight: '600' },
   applyBtn: {
     backgroundColor: PRIMARY,
     paddingVertical: 12,

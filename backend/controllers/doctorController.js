@@ -42,11 +42,17 @@ const getDoctorById = (req, res) => {
     res.status(200).json(doctor);
   });
 };
+const parseArrayParam = (val) => {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  return String(val).split(',').map((s) => s.trim()).filter(Boolean);
+};
+
 const fetchDoctorsWithFilters = (req, res) => {
   const filters = {
     search: req.query.search,
-    city: req.query.city,
-    speciality: req.query.speciality,
+    cities: parseArrayParam(req.query.city || req.query.cities),
+    specialities: parseArrayParam(req.query.speciality || req.query.specialities),
     page: req.query.page,
     limit: req.query.limit,
   };

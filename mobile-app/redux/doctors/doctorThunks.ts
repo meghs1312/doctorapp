@@ -16,15 +16,15 @@ export const fetchDoctors = createAsyncThunk(
 export const fetchDoctorsWithFilters = createAsyncThunk(
   'doctors/fetchDoctorsWithFilters',
   async (
-    params: { search?: string; city?: string; speciality?: string; page?: number; limit?: number; append?: boolean },
+    params: { search?: string; cities?: string[]; specialities?: string[]; page?: number; limit?: number; append?: boolean },
     thunkAPI
   ) => {
     try {
       const { append, ...query } = params;
       const data = await apiGet('/doctors', {
         search: query.search,
-        city: query.city,
-        speciality: query.speciality,
+        city: query.cities?.length ? query.cities : undefined,
+        speciality: query.specialities?.length ? query.specialities : undefined,
         page: query.page ?? 1,
         limit: query.limit ?? 10,
       });

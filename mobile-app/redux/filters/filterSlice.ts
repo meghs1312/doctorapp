@@ -2,8 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   search: '',
-  city: '',
-  speciality: '',
+  cities: [] as string[],
+  specialities: [] as string[],
   page: 1,
   limit: 10,
 };
@@ -15,16 +15,28 @@ const filterSlice = createSlice({
     setSearch(state, action) {
       state.search = action.payload;
     },
-    setCity(state, action) {
-      state.city = action.payload;
+    setCities(state, action) {
+      state.cities = Array.isArray(action.payload) ? action.payload : [];
     },
-    setSpeciality(state, action) {
-      state.speciality = action.payload;
+    setSpecialities(state, action) {
+      state.specialities = Array.isArray(action.payload) ? action.payload : [];
+    },
+    toggleCity(state, action) {
+      const city = action.payload;
+      const idx = state.cities.indexOf(city);
+      if (idx === -1) state.cities.push(city);
+      else state.cities.splice(idx, 1);
+    },
+    toggleSpeciality(state, action) {
+      const spec = action.payload;
+      const idx = state.specialities.indexOf(spec);
+      if (idx === -1) state.specialities.push(spec);
+      else state.specialities.splice(idx, 1);
     },
     resetFilters(state) {
       state.search = '';
-      state.city = '';
-      state.speciality = '';
+      state.cities = [];
+      state.specialities = [];
       state.page = 1;
     },
     setPage(state, action) {
@@ -35,8 +47,10 @@ const filterSlice = createSlice({
 
 export const {
   setSearch,
-  setCity,
-  setSpeciality,
+  setCities,
+  setSpecialities,
+  toggleCity,
+  toggleSpeciality,
   resetFilters,
   setPage,
 } = filterSlice.actions;

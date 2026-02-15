@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { fetchTopDoctors } from '@/redux/doctors/doctorThunks';
-import { setSearch, setCity, setSpeciality } from '@/redux/filters/filterSlice';
+import { setSearch, setCities, setSpecialities } from '@/redux/filters/filterSlice';
 import { CITIES, SPECIALITIES } from '@/constants/theme';
 
 const PRIMARY = '#0a7ea4';
@@ -16,18 +16,18 @@ export default function HomeScreen() {
   const dispatch = useDispatch();
   const { topDoctors } = useSelector((state: { doctors: { topDoctors: Array<Record<string, unknown>> } }) => state.doctors);
   const [searchInput, setSearchInput] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedSpeciality, setSelectedSpeciality] = useState('');
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedSpecialities, setSelectedSpecialities] = useState<string[]>([]);
 
   useEffect(() => {
     dispatch(fetchTopDoctors());
   }, [dispatch]);
 
-  const goToListing = (filters?: { search?: string; city?: string; speciality?: string }) => {
+  const goToListing = (filters?: { search?: string; cities?: string[]; specialities?: string[] }) => {
     if (filters) {
       if (filters.search !== undefined) dispatch(setSearch(filters.search));
-      if (filters.city !== undefined) dispatch(setCity(filters.city));
-      if (filters.speciality !== undefined) dispatch(setSpeciality(filters.speciality));
+      if (filters.cities !== undefined) dispatch(setCities(filters.cities));
+      if (filters.specialities !== undefined) dispatch(setSpecialities(filters.specialities));
     }
     router.push('/screens/Doctorlisting');
   };
@@ -35,9 +35,21 @@ export default function HomeScreen() {
   const handleSearchSubmit = () => {
     goToListing({
       search: searchInput.trim(),
-      city: selectedCity,
-      speciality: selectedSpeciality,
+      cities: selectedCities,
+      specialities: selectedSpecialities,
     });
+  };
+
+  const toggleCity = (city: string) => {
+    setSelectedCities((prev) =>
+      prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
+    );
+  };
+
+  const toggleSpeciality = (spec: string) => {
+    setSelectedSpecialities((prev) =>
+      prev.includes(spec) ? prev.filter((s) => s !== spec) : [...prev, spec]
+    );
   };
 
   const top4 = Array.isArray(topDoctors) ? topDoctors.slice(0, 4) : [];
@@ -75,19 +87,31 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Section 2: Speciality Tags */}
+        {/* Section 2: Speciality Tags – multi-select */}
         <View style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Browse by Speciality</ThemedText>
           <View style={styles.tagsWrap}>
-            {SPECIALITIES.map((spec) => (
-              <Pressable
-                key={spec}
-                style={({ pressed }) => [styles.tag, pressed && styles.tagPressed]}
-                onPress={() => goToListing({ speciality: spec })}
-              >
-                <ThemedText type="defaultSemiBold" style={styles.tagText}>{spec}</ThemedText>
-              </Pressable>
-            ))}
+            {SPECIALITIES.map((spec) => {
+              const isSelected = selectedSpecialities.includes(spec);
+              return (
+                <Pressable
+                  key={spec}
+                  style={({ pressed }) => [
+                    styles.tag,
+                    isSelected && styles.tagSelected,
+                    pressed && styles.tagPressed,
+                  ]}
+                  onPress={() => toggleSpeciality(spec)}
+                >
+                  <ThemedText
+                    type="defaultSemiBold"
+                    style={[styles.tagText, isSelected && styles.tagTextSelected]}
+                  >
+                    {spec}
+                  </ThemedText>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -95,8 +119,44 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Search & Filter</ThemedText>
           <TextInput style={styles.input} placeholder="Doctor name" placeholderTextColor="#999" value={searchInput} onChangeText={setSearchInput} />
-          <TextInput style={styles.input} placeholder="City" placeholderTextColor="#999" value={selectedCity} onChangeText={setSelectedCity} />
-          <TextInput style={styles.input} placeholder="Speciality" placeholderTextColor="#999" value={selectedSpeciality} onChangeText={setSelectedSpeciality} />
+          <ThemedText style={styles.filterLabel}>Filter by City</ThemedText>
+          <View style={styles.filterWrap}>
+            {CITIES.map((city) => {
+              const isSelected = selectedCities.includes(city);
+              return (
+                <Pressable
+                  key={city}
+                  style={({ pressed }) => [
+                    styles.filterChip,
+                    isSelected && styles.filterChipSelected,
+                    pressed && styles.filterChipPressed,
+                  ]}
+                  onPress={() => toggleCity(city)}
+                >
+                  <ThemedText style={[styles.filterChipText, isSelected && styles.filterChipTextSelected]}>{city}</ThemedText>
+                </Pressable>
+              );
+            })}
+          </View>
+          <ThemedText style={styles.filterLabel}>Filter by Speciality</ThemedText>
+          <View style={styles.filterWrap}>
+            {SPECIALITIES.map((spec) => {
+              const isSelected = selectedSpecialities.includes(spec);
+              return (
+                <Pressable
+                  key={spec}
+                  style={({ pressed }) => [
+                    styles.filterChip,
+                    isSelected && styles.filterChipSelected,
+                    pressed && styles.filterChipPressed,
+                  ]}
+                  onPress={() => toggleSpeciality(spec)}
+                >
+                  <ThemedText style={[styles.filterChipText, isSelected && styles.filterChipTextSelected]}>{spec}</ThemedText>
+                </Pressable>
+              );
+            })}
+          </View>
           <Pressable style={({ pressed }) => [styles.searchBtn, pressed && styles.btnPressed]} onPress={handleSearchSubmit}>
             <Text style={styles.searchBtnText}>Search Doctors</Text>
           </Pressable>
@@ -137,9 +197,25 @@ const styles = StyleSheet.create({
   emptyHintSub: { fontSize: 13, marginTop: 4, opacity: 0.8 },
   tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   tag: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, backgroundColor: '#f0f4f8', borderWidth: 1, borderColor: '#e0e4e8' },
+  tagSelected: { backgroundColor: PRIMARY, borderColor: PRIMARY },
   tagPressed: { opacity: 0.85 },
   tagText: { fontSize: 14 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 14, marginBottom: 12, fontSize: 16 },
+  tagTextSelected: { color: '#fff' },
+  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 14, marginBottom: 16, fontSize: 16 },
+  filterLabel: { fontSize: 14, fontWeight: '600', marginBottom: 10, opacity: 0.9 },
+  filterWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  filterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f4f8',
+    borderWidth: 1,
+    borderColor: '#e0e4e8',
+  },
+  filterChipSelected: { backgroundColor: PRIMARY, borderColor: PRIMARY },
+  filterChipPressed: { opacity: 0.9 },
+  filterChipText: { fontSize: 13 },
+  filterChipTextSelected: { color: '#fff', fontWeight: '600' },
   searchBtn: { backgroundColor: PRIMARY, padding: 16, borderRadius: 10, alignItems: 'center' },
   btnPressed: { opacity: 0.9 },
   searchBtnText: { color: '#fff', fontWeight: '600', fontSize: 16 },

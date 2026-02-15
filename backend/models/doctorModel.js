@@ -78,14 +78,16 @@ const getDoctorsWithFilters = (filters, callback) => {
     values.push(`%${filters.search}%`);
   }
 
-  if (filters.city) {
-    whereClause += ' AND city = ?';
-    values.push(filters.city);
+  if (filters.cities && filters.cities.length > 0) {
+    const placeholders = filters.cities.map(() => '?').join(',');
+    whereClause += ` AND city IN (${placeholders})`;
+    values.push(...filters.cities);
   }
 
-  if (filters.speciality) {
-    whereClause += ' AND speciality = ?';
-    values.push(filters.speciality);
+  if (filters.specialities && filters.specialities.length > 0) {
+    const placeholders = filters.specialities.map(() => '?').join(',');
+    whereClause += ` AND speciality IN (${placeholders})`;
+    values.push(...filters.specialities);
   }
 
   const limit = parseInt(filters.limit) || 10;
