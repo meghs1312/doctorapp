@@ -87,31 +87,21 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Section 2: Speciality Tags – multi-select */}
+        {/* Section 2: Speciality Tags – tap navigates to Doctor Listing with that speciality as filter */}
         <View style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Browse by Speciality</ThemedText>
           <View style={styles.tagsWrap}>
-            {SPECIALITIES.map((spec) => {
-              const isSelected = selectedSpecialities.includes(spec);
-              return (
-                <Pressable
-                  key={spec}
-                  style={({ pressed }) => [
-                    styles.tag,
-                    isSelected && styles.tagSelected,
-                    pressed && styles.tagPressed,
-                  ]}
-                  onPress={() => toggleSpeciality(spec)}
-                >
-                  <ThemedText
-                    type="defaultSemiBold"
-                    style={[styles.tagText, isSelected && styles.tagTextSelected]}
-                  >
-                    {spec}
-                  </ThemedText>
-                </Pressable>
-              );
-            })}
+            {SPECIALITIES.map((spec) => (
+              <Pressable
+                key={spec}
+                style={({ pressed }) => [styles.tag, pressed && styles.tagPressed]}
+                onPress={() => goToListing({ specialities: [spec], search: searchInput.trim(), cities: selectedCities })}
+              >
+                <ThemedText type="defaultSemiBold" style={styles.tagText}>
+                  {spec}
+                </ThemedText>
+              </Pressable>
+            ))}
           </View>
         </View>
 

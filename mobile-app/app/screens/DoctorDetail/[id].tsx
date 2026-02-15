@@ -37,7 +37,12 @@ export default function DoctorDetailScreen() {
       .then((data: unknown) => {
         const raw = Array.isArray(data) ? data : (data as { doctors?: unknown[] })?.doctors;
         const list = Array.isArray(raw) ? raw : [];
-        const ids = list.map((d: Record<string, unknown>) => Number(d.id)).filter((n) => n > 0);
+        const ids = list.map((d: Record<string, unknown>) => {
+          const rawId = d.id;
+          if (rawId == null) return 0;
+          const n = typeof rawId === 'number' ? rawId : Number(rawId);
+          return Number.isFinite(n) ? n : 0;
+        }).filter((n) => n > 0);
         setTopTenIds(ids);
         setTopTenLoaded(true);
       })
@@ -55,9 +60,9 @@ export default function DoctorDetailScreen() {
 
   const doc = selectedDoctor as Record<string, unknown>;
   const pic = typeof doc.profile_picture === 'string' && doc.profile_picture ? doc.profile_picture : PLACEHOLDER_IMAGE;
-  const doctorId = Number(id);
-  const isTopSearched = doctorId > 0 && topTenIds.includes(doctorId);
+  const doctorId = Number(id) || 0;
   const searchCount = Number(doc.search_count ?? 0);
+  const isTopSearched = doctorId > 0 && (topTenIds.includes(doctorId) || topTenIds.some((n) => Number(n) === doctorId));
 
   return (
     <ThemedView style={styles.container}>

@@ -19,7 +19,7 @@ export default function DoctorRegistrationScreen() {
   const [loading, setLoading] = useState(false);
   const [step1, setStep1] = useState({
     name: '',
-    gender: 'Male',
+    gender: '',
     age: '',
     email: '',
     phone: '',
