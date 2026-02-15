@@ -1,11 +1,11 @@
+import { View, Text, ScrollView, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchDoctorById } from '@/redux/doctors/doctorThunks';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { fetchDoctorById } from '@/redux/doctors/doctorThunks';
 import { apiGet } from '@/services/api';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
 
 const PRIMARY = '#0a7ea4';
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/120?text=MD';
@@ -35,17 +35,18 @@ export default function DoctorDetailScreen() {
     if (!selectedDoctor || topTenLoaded) return;
     apiGet('/doctors/top', { limit: 10 })
       .then((data: unknown) => {
-        console.log('Top doctors API response:', data);
-        const list = Array.isArray(data) ? data : [];
-        const ids = list.map((d: Record<string, unknown>) => Number(d.id)).filter((n) => n > 0);
-        console.log('Top doctor IDs:', ids);
+        const raw = Array.isArray(data) ? data : (data as { doctors?: unknown[] })?.doctors;
+        const list = Array.isArray(raw) ? raw : [];
+        const ids = list.map((d: Record<string, unknown>) => {
+          const rawId = d.id;
+          if (rawId == null) return 0;
+          const n = typeof rawId === 'number' ? rawId : Number(rawId);
+          return Number.isFinite(n) ? n : 0;
+        }).filter((n) => n > 0);
         setTopTenIds(ids);
         setTopTenLoaded(true);
       })
-      .catch((error) => {
-        console.error('Error fetching top doctors:', error);
-        setTopTenLoaded(true);
-      });
+      .catch(() => setTopTenLoaded(true));
   }, [selectedDoctor, topTenLoaded]);
 
   if (loading || !selectedDoctor) {
@@ -59,14 +60,9 @@ export default function DoctorDetailScreen() {
 
   const doc = selectedDoctor as Record<string, unknown>;
   const pic = typeof doc.profile_picture === 'string' && doc.profile_picture ? doc.profile_picture : PLACEHOLDER_IMAGE;
-  const doctorId = Number(id);
-  const isTopSearched = doctorId > 0 && topTenIds.includes(doctorId);
+  const doctorId = Number(id) || 0;
   const searchCount = Number(doc.search_count ?? 0);
-  
-  console.log('Doctor ID:', doctorId);
-  console.log('Top Ten IDs:', topTenIds);
-  console.log('Is Top Searched:', isTopSearched);
-  console.log('Search Count:', searchCount);
+  const isTopSearched = doctorId > 0 && (topTenIds.includes(doctorId) || topTenIds.some((n) => Number(n) === doctorId));
 
   return (
     <ThemedView style={styles.container}>
