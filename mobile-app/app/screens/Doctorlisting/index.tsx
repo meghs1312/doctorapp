@@ -1,13 +1,13 @@
-import { View, TextInput, FlatList, Pressable, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { fetchDoctorsWithFilters } from '@/redux/doctors/doctorThunks';
-import { setSearch, setCities, setSpecialities } from '@/redux/filters/filterSlice';
-import { clearList } from '@/redux/doctors/doctorSlice';
 import { CITIES, SPECIALITIES } from '@/constants/theme';
+import { clearList } from '@/redux/doctors/doctorSlice';
+import { fetchDoctorsWithFilters } from '@/redux/doctors/doctorThunks';
+import { setCities, setSearch, setSpecialities } from '@/redux/filters/filterSlice';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 const PRIMARY = '#0a7ea4';
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/80?text=MD';
@@ -64,7 +64,7 @@ export default function DoctorListingScreen() {
   useEffect(() => {
     dispatch(clearList());
     load(false);
-  }, []);
+  }, [load]);
 
   const applyFilters = () => {
     dispatch(setSearch(searchInput.trim()));

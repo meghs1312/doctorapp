@@ -1,10 +1,12 @@
-import { View, TextInput, ScrollView, Pressable, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { registerDoctor } from '@/redux/doctors/doctorThunks';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useDispatch } from 'react-redux';
 
 const PRIMARY = '#0a7ea4';
 const INPUT_BG = '#f8f9fa';
@@ -36,6 +38,26 @@ export default function DoctorRegistrationScreen() {
 
   const canNextStep1 = step1.name.trim() && step1.gender && step1.age.trim() && step1.email.trim() && step1.phone.trim() && step1.city.trim();
   const canSubmit = canNextStep1 && step2.institute_name.trim() && step2.degree_name.trim() && step2.speciality.trim() && step2.yoe.trim() && step2.consultation_fee.trim();
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission Required', 'Permission to access camera roll is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setStep1(s => ({ ...s, profile_picture: result.assets[0].uri }));
+    }
+  };
 
   const handleNext = () => {
     if (step === 1 && canNextStep1) setStep(2);
@@ -95,7 +117,25 @@ export default function DoctorRegistrationScreen() {
             <TextInput style={styles.input} placeholder="Email *" placeholderTextColor="#888" keyboardType="email-address" autoCapitalize="none" value={step1.email} onChangeText={(t) => setStep1((s) => ({ ...s, email: t }))} />
             <TextInput style={styles.input} placeholder="Phone *" placeholderTextColor="#888" keyboardType="phone-pad" value={step1.phone} onChangeText={(t) => setStep1((s) => ({ ...s, phone: t }))} />
             <TextInput style={styles.input} placeholder="City *" placeholderTextColor="#888" value={step1.city} onChangeText={(t) => setStep1((s) => ({ ...s, city: t }))} />
-            <TextInput style={styles.input} placeholder="Profile picture URL (optional)" placeholderTextColor="#888" value={step1.profile_picture} onChangeText={(t) => setStep1((s) => ({ ...s, profile_picture: t }))} />
+            
+            <ThemedText style={styles.label}>Profile Picture (optional)</ThemedText>
+            <View style={styles.imageSection}>
+              {step1.profile_picture ? (
+                <View style={styles.imageContainer}>
+                  <Image source={{ uri: step1.profile_picture }} style={styles.previewImage} />
+                  <Pressable style={styles.changeImageBtn} onPress={pickImage}>
+                    <Text style={styles.changeImageText}>Change Photo</Text>
+                  </Pressable>
+                  <Pressable style={styles.removeImageBtn} onPress={() => setStep1(s => ({ ...s, profile_picture: '' }))}>
+                    <Text style={styles.removeImageText}>Remove</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable style={styles.addImageBtn} onPress={pickImage}>
+                  <Text style={styles.addImageText}>📷 Add Profile Picture</Text>
+                </Pressable>
+              )}
+            </View>
             <Pressable style={[styles.btn, !canNextStep1 && styles.btnDisabled]} onPress={handleNext} disabled={!canNextStep1}>
               <Text style={styles.btnText}>Next</Text>
             </Pressable>
@@ -154,4 +194,34 @@ const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.5 },
   btnText: { color: '#fff', fontWeight: '600', fontSize: 16 },
   btnTextSecondary: { color: PRIMARY, fontWeight: '600' },
+  imageSection: { marginBottom: 16 },
+  imageContainer: { alignItems: 'center' },
+  previewImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 12 },
+  addImageBtn: { 
+    backgroundColor: INPUT_BG, 
+    borderWidth: 2, 
+    borderStyle: 'dashed', 
+    borderColor: BORDER, 
+    borderRadius: 10, 
+    padding: 20, 
+    alignItems: 'center' 
+  },
+  addImageText: { color: PRIMARY, fontSize: 16, fontWeight: '500' },
+  changeImageBtn: { 
+    backgroundColor: PRIMARY, 
+    paddingHorizontal: 16, 
+    paddingVertical: 8, 
+    borderRadius: 6, 
+    marginBottom: 8 
+  },
+  changeImageText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  removeImageBtn: { 
+    backgroundColor: 'transparent', 
+    borderWidth: 1, 
+    borderColor: '#dc3545', 
+    paddingHorizontal: 16, 
+    paddingVertical: 8, 
+    borderRadius: 6 
+  },
+  removeImageText: { color: '#dc3545', fontSize: 14, fontWeight: '500' },
 });
