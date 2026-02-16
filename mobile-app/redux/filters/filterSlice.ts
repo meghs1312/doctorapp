@@ -39,9 +39,7 @@ const filterSlice = createSlice({
       state.specialities = [];
       state.page = 1;
     },
-    setPage(state, action) {
-      state.page = action.payload;
-    },
+
   },
 });
 
@@ -52,7 +50,7 @@ export const {
   toggleCity,
   toggleSpeciality,
   resetFilters,
-  setPage,
+
 } = filterSlice.actions;
 
 export default filterSlice.reducer;

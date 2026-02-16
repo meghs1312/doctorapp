@@ -38,7 +38,7 @@ export default function DoctorDetailScreen() {
     if (!selectedDoctor || topTenLoaded) return;
     apiGet('/doctors/top', { limit: 10 })
       .then((data: unknown) => {
-        console.log('Top doctors API response:', data);
+//
         const list = Array.isArray(data) ? data : [];
         const ids = list.map((d: Record<string, unknown>) => {
           const rawId = d.id;
@@ -46,7 +46,7 @@ export default function DoctorDetailScreen() {
           const n = typeof rawId === 'number' ? rawId : Number(rawId);
           return Number.isFinite(n) ? n : 0;
         }).filter((n) => n > 0);
-        console.log('Top doctor IDs:', ids);
+
         setTopTenIds(ids);
         setTopTenLoaded(true);
       })
@@ -76,12 +76,9 @@ export default function DoctorDetailScreen() {
   const pic = typeof doc.profile_picture === 'string' && doc.profile_picture ? doc.profile_picture : PLACEHOLDER_IMAGE;
   const doctorId = Number(id) || 0;
   const searchCount = Number(doc.search_count ?? 0);
-  const isTopSearched = doctorId > 0 && (topTenIds.includes(doctorId) || topTenIds.some((n) => Number(n) === doctorId));
+  const isTopSearched = doctorId > 0 && (topTenIds.includes(doctorId) );
   
-  console.log('Doctor ID:', doctorId);
-  console.log('Top Ten IDs:', topTenIds);
-  console.log('Is Top Searched:', isTopSearched);
-  console.log('Search Count:', searchCount);
+
 
   return (
     <ThemedView style={styles.container}>

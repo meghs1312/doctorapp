@@ -62,14 +62,14 @@ export default function HomeScreen() {
           <ThemedText type="subtitle" style={styles.sectionTitle}>Most Searched Doctors</ThemedText>
           <View style={styles.verticalList}>
             {top4.map((doc: Record<string, unknown>) => {
-              const pic = (typeof doc.profile_picture === 'string' && doc.profile_picture) ? doc.profile_picture : PLACEHOLDER_IMAGE;
+
               return (
                 <Pressable
                   key={String(doc.id)}
                   style={({ pressed }) => [styles.doctorCard, pressed && styles.cardPressed]}
                   onPress={() => router.push(`/screens/DoctorDetail/${doc.id}`)}
                 >
-                  <Image source={{ uri: pic }} style={styles.doctorAvatar} />
+
                   <View style={styles.doctorCardBody}>
                     <ThemedText type="defaultSemiBold" numberOfLines={1} style={styles.doctorName}>{String(doc.name ?? '')}</ThemedText>
                     <ThemedText style={styles.cardSub}>{String(doc.speciality ?? '')}</ThemedText>
@@ -152,7 +152,7 @@ export default function HomeScreen() {
         </View>
 
         <Pressable style={({ pressed }) => [styles.registerBtn, pressed && styles.btnPressed]} onPress={() => router.push('/screens/DoctorRegistration')}>
-          <ThemedText type="defaultSemiBold" style={styles.registerBtnText}>Register a Doctor</ThemedText>
+
         </Pressable>
       </ScrollView>
     </ThemedView>
@@ -208,6 +208,5 @@ const styles = StyleSheet.create({
   searchBtn: { backgroundColor: PRIMARY, padding: 16, borderRadius: 10, alignItems: 'center' },
   btnPressed: { opacity: 0.9 },
   searchBtnText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  registerBtn: { marginHorizontal: 20, padding: 16, borderRadius: 10, alignItems: 'center', borderWidth: 2, borderColor: PRIMARY },
-  registerBtnText: { color: PRIMARY },
+
 });

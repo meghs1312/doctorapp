@@ -5,7 +5,7 @@ import { clearList } from '@/redux/doctors/doctorSlice';
 import { fetchDoctorsWithFilters } from '@/redux/doctors/doctorThunks';
 import { setCities, setSearch, setSpecialities } from '@/redux/filters/filterSlice';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -36,7 +36,7 @@ function DoctorCard({ item, onPress }: { item: Record<string, unknown>; onPress:
 export default function DoctorListingScreen() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { list, listLoading, hasMore, page } = useSelector((state: any) => state.doctors);
+  const { list, listLoading } = useSelector((state: any) => state.doctors);
   const { search, cities, specialities } = useSelector((state: any) => state.filters);
 
   const [searchInput, setSearchInput] = useState(search);
@@ -48,26 +48,6 @@ export default function DoctorListingScreen() {
     setSelectedCities(Array.isArray(cities) ? cities : []);
     setSelectedSpecialities(Array.isArray(specialities) ? specialities : []);
   }, [search, cities, specialities]);
-
-  const pageRef = useRef(page);
-  useEffect(() => {
-    pageRef.current = page;
-  }, [page]);
-
-  const load = useCallback((append: boolean) => {
-    const nextPage = append ? pageRef.current + 1 : 1;
-    dispatch(fetchDoctorsWithFilters({
-      search: searchInput.trim() || undefined,
-      cities: selectedCities.length ? selectedCities : undefined,
-      specialities: selectedSpecialities.length ? selectedSpecialities : undefined,
-      page: nextPage,
-      limit: 10,
-      append,
-    }) as any);
-  }, [dispatch, searchInput, selectedCities, selectedSpecialities]);
-
-
-
 
   const applyFilters = () => {
     dispatch(setSearch(searchInput.trim()));
@@ -93,10 +73,6 @@ export default function DoctorListingScreen() {
     setSelectedSpecialities((prev) =>
       prev.includes(spec) ? prev.filter((s) => s !== spec) : [...prev, spec]
     );
-  };
-
-  const loadMore = () => {
-    if (!listLoading && hasMore) load(true);
   };
 
   return (
@@ -160,29 +136,11 @@ export default function DoctorListingScreen() {
         renderItem={({ item }) => (
           <DoctorCard item={item} onPress={() => router.push(`/screens/DoctorDetail/${item.id}`)} />
         )}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.4}
         ListEmptyComponent={
           listLoading ? (
             <ActivityIndicator size="large" color={PRIMARY} style={styles.loader} />
           ) : (
             <ThemedText style={styles.empty}>No doctors found. Try different filters.</ThemedText>
-          )
-        }
-        ListFooterComponent={
-          list.length === 0 ? null : (
-            <View style={styles.footer}>
-              {listLoading ? (
-                <>
-                  <ActivityIndicator size="small" color={PRIMARY} />
-                  <ThemedText style={styles.footerText}>Loading more...</ThemedText>
-                </>
-              ) : hasMore ? (
-                <ThemedText style={styles.footerHint}>Scroll for more</ThemedText>
-              ) : (
-                <ThemedText style={styles.footerEnd}>No more doctors</ThemedText>
-              )}
-            </View>
           )
         }
       />
@@ -259,15 +217,4 @@ const styles = StyleSheet.create({
   fee: { fontSize: 15, fontWeight: '600', marginTop: 6 },
   loader: { marginTop: 24 },
   empty: { textAlign: 'center', fontSize: 15 },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 20,
-    paddingBottom: 32,
-  },
-  footerText: { fontSize: 14, opacity: 0.9 },
-  footerHint: { fontSize: 13, opacity: 0.7 },
-  footerEnd: { fontSize: 13, opacity: 0.7 },
 });

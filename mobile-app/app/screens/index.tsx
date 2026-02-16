@@ -3,8 +3,8 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
-const PRIMARY = '#0a7ea4';
-const PRIMARY_LIGHT = '#e8f4fc';
+const PRIMARY = '#3cb371';
+const PRIMARY_LIGHT = '#4169e1';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -48,10 +48,10 @@ const styles = StyleSheet.create({
   actions: { gap: 16 },
   primaryBtn: {
     backgroundColor: PRIMARY,
-    paddingVertical: 20,
+    paddingVertical: 25,
     paddingHorizontal: 24,
     borderRadius: 12,
-    borderWidth: 0,
+
   },
   secondaryBtn: {
     backgroundColor: PRIMARY_LIGHT,
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: PRIMARY,
+
   },
   pressed: { opacity: 0.85 },
   primaryBtnText: { color: '#fff', fontSize: 18, fontWeight: '700', textAlign: 'center' },
