@@ -72,7 +72,7 @@ const doctorSlice = createSlice({
         state.loading = false;
       })
       .addCase(registerDoctor.fulfilled, () => {});
-      // registerDoctor.rejected can be handled in the form
+
   },
 });
 

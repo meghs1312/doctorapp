@@ -46,7 +46,7 @@ const createDoctor = (doctorData, callback) => {
 const getDoctorById = (doctorId, callback) => {
   const updateQuery = `
     UPDATE doctors
-    SET search_count = search_count + 1
+    SET search_count = search_count +1
     WHERE id = ?
   `;
 
