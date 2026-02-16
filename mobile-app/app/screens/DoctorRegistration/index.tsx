@@ -35,10 +35,8 @@ export default function DoctorRegistrationScreen() {
     yoe: '',
     consultation_fee: '',
   });
-
   const canNextStep1 = step1.name.trim() && step1.gender && step1.age.trim() && step1.email.trim() && step1.phone.trim() && step1.city.trim();
   const canSubmit = canNextStep1 && step2.institute_name.trim() && step2.degree_name.trim() && step2.speciality.trim() && step2.yoe.trim() && step2.consultation_fee.trim();
-
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -80,6 +78,7 @@ export default function DoctorRegistrationScreen() {
         speciality: step2.speciality.trim(),
         yoe: parseInt(step2.yoe, 10),
         consultation_fee: parseFloat(step2.consultation_fee),
+
       }) as any).unwrap();
       Alert.alert('Success', 'Doctor registered successfully.', [
         { text: 'OK', onPress: () => router.back() },
@@ -132,7 +131,7 @@ export default function DoctorRegistrationScreen() {
                 </View>
               ) : (
                 <Pressable style={styles.addImageBtn} onPress={pickImage}>
-                  <Text style={styles.addImageText}>📷 Add Profile Picture</Text>
+                  <Text style={styles.addImageText}> Add Profile Picture</Text>
                 </Pressable>
               )}
             </View>

@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { clearSelectedDoctor } from '@/redux/doctors/doctorSlice';
 import { fetchDoctorById } from '@/redux/doctors/doctorThunks';
 import { apiGet } from '@/services/api';
 import { useLocalSearchParams } from 'expo-router';
@@ -23,12 +24,14 @@ export default function DoctorDetailScreen() {
   const { id: idParam } = useLocalSearchParams<{ id: string }>();
   const id = useMemo(() => (Array.isArray(idParam) ? idParam[0] : idParam) ?? '', [idParam]);
   const dispatch = useDispatch();
-  const { selectedDoctor, loading } = useSelector((state: any) => state.doctors);
+  const { selectedDoctor, loading, error } = useSelector((state: any) => state.doctors);
   const [topTenIds, setTopTenIds] = useState<number[]>([]);
   const [topTenLoaded, setTopTenLoaded] = useState(false);
 
   useEffect(() => {
-    if (id) dispatch(fetchDoctorById(id));
+    if (!id) return;
+    dispatch(clearSelectedDoctor());
+    dispatch(fetchDoctorById(id));
   }, [id, dispatch]);
 
   useEffect(() => {
@@ -53,11 +56,18 @@ export default function DoctorDetailScreen() {
       });
   }, [selectedDoctor, topTenLoaded]);
 
-  if (loading || !selectedDoctor) {
+  if (loading) {
     return (
       <ThemedView style={styles.centered}>
         <ActivityIndicator size="large" color={PRIMARY} />
         <ThemedText style={styles.loadingText}>Loading...</ThemedText>
+      </ThemedView>
+    );
+  }
+  if (!selectedDoctor) {
+    return (
+      <ThemedView style={styles.centered}>
+        <ThemedText style={styles.loadingText}>{error || 'Doctor not found.'}</ThemedText>
       </ThemedView>
     );
   }

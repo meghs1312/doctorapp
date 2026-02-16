@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-// GET all doctors
+
 const getAllDoctors = (callback) => {
   const query = 'SELECT * FROM doctors';
 
@@ -12,7 +12,7 @@ const getAllDoctors = (callback) => {
   });
 };
 
-// CREATE a doctor
+
 const createDoctor = (doctorData, callback) => {
   const query = `
     INSERT INTO doctors

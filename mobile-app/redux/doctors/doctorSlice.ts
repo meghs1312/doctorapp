@@ -63,13 +63,16 @@ const doctorSlice = createSlice({
       })
       .addCase(fetchDoctorById.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchDoctorById.fulfilled, (state, action) => {
         state.loading = false;
+        state.error = null;
         state.selectedDoctor = (action.payload as Record<string, unknown>) || null;
       })
       .addCase(fetchDoctorById.rejected, (state) => {
         state.loading = false;
+        state.error = 'Failed to load doctor';
       })
       .addCase(registerDoctor.fulfilled, () => {});
 

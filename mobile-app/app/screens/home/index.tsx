@@ -20,7 +20,7 @@ export default function HomeScreen() {
   const [selectedSpecialities, setSelectedSpecialities] = useState<string[]>([]);
 
   useEffect(() => {
-    dispatch(fetchTopDoctors());
+    dispatch(fetchTopDoctors() );
   }, [dispatch]);
 
   const goToListing = (filters?: { search?: string; cities?: string[]; specialities?: string[] }) => {
@@ -52,12 +52,12 @@ export default function HomeScreen() {
     );
   };
 
-  const top4 = Array.isArray(topDoctors) ? topDoctors.slice(0, 4) : [];
+  const top4 = Array.isArray(topDoctors) ? topDoctors.slice(0,4) : [];
 
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Section 1: Most Searched Doctors - VERTICAL list */}
+
         <View style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Most Searched Doctors</ThemedText>
           <View style={styles.verticalList}>
@@ -73,7 +73,7 @@ export default function HomeScreen() {
                   <View style={styles.doctorCardBody}>
                     <ThemedText type="defaultSemiBold" numberOfLines={1} style={styles.doctorName}>{String(doc.name ?? '')}</ThemedText>
                     <ThemedText style={styles.cardSub}>{String(doc.speciality ?? '')}</ThemedText>
-                    <ThemedText style={styles.cardSub}>{String(doc.city ?? '')} · ₹{doc.consultation_fee ?? '—'}</ThemedText>
+                    <ThemedText style={styles.cardSub}>{String(doc.city ?? '')} · ₹{String(doc.consultation_fee ?? '—')}</ThemedText>
                   </View>
                 </Pressable>
               );
@@ -87,7 +87,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Section 2: Speciality Tags – tap navigates to Doctor Listing with that speciality as filter */}
+
         <View style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Browse by Speciality</ThemedText>
           <View style={styles.tagsWrap}>
@@ -105,7 +105,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Section 3: Search and Filter */}
         <View style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Search & Filter</ThemedText>
           <TextInput style={styles.input} placeholder="Doctor name" placeholderTextColor="#999" value={searchInput} onChangeText={setSearchInput} />

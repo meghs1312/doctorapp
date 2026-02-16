@@ -11,7 +11,7 @@ const fetchDoctors = (req, res) => {
 };
 
 const createDoctor = (req, res) => {
-  // reads JSON sent by client
+
   const doctorData = req.body;
 
   doctorModel.createDoctor(doctorData, (err, result) => {
@@ -20,7 +20,7 @@ const createDoctor = (req, res) => {
     }
 
     res.status(201).json({
-      // 201 = resource created
+
       message: 'Doctor created successfully',
       doctorId: result.insertId,
     });
@@ -66,7 +66,7 @@ const fetchDoctorsWithFilters = (req, res) => {
   });
 };
 const fetchTopSearchedDoctors = (req, res) => {
-  const limit = parseInt(req.query.limit, 10) || 4;
+  const limit = parseInt(req.query.limit, 10) ||4;
 
   doctorModel.getTopSearchedDoctors(limit, (err, doctors) => {
     if (err) {
